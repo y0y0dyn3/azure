@@ -1,5 +1,4 @@
-﻿
-param(
+﻿param(
 [parameter (Mandatory=$true)][guid]$subscriptionID,
 [parameter (Mandatory=$true)][String]$storageAccountName,
 [parameter (Mandatory=$true)][String]$storageAccountKey,
@@ -8,17 +7,9 @@ param(
 [parameter (Mandatory=$true)][String]$localFile
 )
 
-
 $contextparams = @{"StorageAccountName"=$storageAccountName;
                   "StorageAccountKey"=$storageAccountKey;
                   "ErrorAction"='Stop';
-                  }
-
-$blobparams = @{"File"=$localFile;
-               "Container"=$container;
-               "Blob"=$blobName;
-               "Context"=$context;
-               "ErrorAction"='Stop'
                 }
 
 try{
@@ -32,14 +23,22 @@ Write-Host
 }
     
 if($context)
-    {
-        try{
-        Set-AzureStorageBlobContent @blobparams
-        }
+{
+        
+$blobparams = @{"File"=$localFile;
+                "Container"=$container;
+                "Blob"=$blobName;
+                "Context"=$context;
+                "ErrorAction"='Stop'
+                }
+            
+try{
+    Set-AzureStorageBlobContent @blobparams
+    }
     
-        catch{
-        Write-Host
-        Write-Host "$($Error[0])" -BackgroundColor Red
-        Write-Host
-        }
+catch{
+    Write-Host
+    Write-Host "$($Error[0])" -BackgroundColor Red
+    Write-Host
+    }
 }
