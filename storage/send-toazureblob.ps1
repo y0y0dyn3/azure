@@ -1,4 +1,32 @@
-﻿param(
+﻿function send-toazureblob {
+
+
+<#
+ .SYNOPSIS
+    Uploads a file to Azure Blob Storage
+
+ .DESCRIPTION
+    A simple script for uploading a file to Azure Blob Storage.
+
+ .PARAMETER subscriptionId
+    The subscription id where the template will be deployed.
+
+ .PARAMETER storageAccountName
+    The Storage Account where the blob will be created.
+
+ .PARAMETER storageAccountKey
+    The key needed for storage access.
+
+ .PARAMETER container
+    The container location.
+
+ .PARAMETER blobName
+    The name of the new blob.
+
+ .PARAMETER localFile
+    The local file to be uploaded.
+#>
+param(
 [parameter (Mandatory=$true)][guid]$subscriptionID,
 [parameter (Mandatory=$true)][String]$storageAccountName,
 [parameter (Mandatory=$true)][String]$storageAccountKey,
@@ -41,4 +69,6 @@ catch{
     Write-Host "$($Error[0])" -BackgroundColor Red
     Write-Host
     }
+}
+
 }
