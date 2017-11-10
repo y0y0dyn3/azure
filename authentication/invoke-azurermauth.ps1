@@ -3,8 +3,10 @@
 {
     [cmdletbinding()]
     param(
-        [parameter (Mandatory=$true)][String]$SubscriptionId,    
+        [parameter (Mandatory=$true)][String]$SubscriptionId,
+        [parameter (Mandatory=$true)][string]$tenantID,   
         [parameter (Mandatory=$false)][String]$ProfilePath,
+        [parameter (Mandatory=$false)][switch]$ServicePrincipal, 
         [parameter (Mandatory=$false)]
             [ValidateSet ('AzureCloud','AzureGermanCloud','AzureChinaCloud','AzureUSGovernment')]
             [String]$EnvironmentName='AzureCloud'    
@@ -19,11 +21,15 @@
             }
 
         catch 
-            {       
-                try
+            {   
+                
+                
+                if(!$ServicePrincipal)
+                {try
                     {           
                         $loginParams = @{
                             'SubscriptionId'= $SubscriptionId
+                            'TenantID' = $tenantID
                             'EnvironmentName'= $EnvironmentName
                             'ErrorAction'='Stop'
                         }   
@@ -36,8 +42,7 @@
                         the issues outlined here:
                         https://stackoverflow.com/questions/10036271/how-to-convert-parameter-type-into-a-different-object-type
                         So...in order to have crednetials that I can pass to a background process, I must do the following.
-                        This also makes using service principle creds harder. Will not add service principle creds until 
-                        I figure this out#>
+                        #>
 
                         if($ProfilePath)
                             {
@@ -46,12 +51,47 @@
                         
                     }
                         
-                catch
+             
+                    catch
                     {
                         Write-Host
                         Write-Host "$($Error[0])" -BackgroundColor Red
                         Write-Host
                     }
-            }
 
+                }
+
+                else{
+
+                    $Creds = Get-Credential
+                    
+                    try{
+                    $loginParams = @{
+                        'SubscriptionId'= $SubscriptionId
+                        'TenantID' = $tenantID
+                        'EnvironmentName'= $EnvironmentName
+                        'Credential' = $Creds
+                        'ErrorAction'='Stop'}
+                        
+                        $azureProfile = Login-AzureRmAccount @loginParams -ServicePrincipal
+
+                        if($ProfilePath)
+                        {
+                            Save-AzureRmContext -Profile $azureProfile -Path $ProfilePath -Force -ErrorAction Stop
+                        }
+
+                        }
+                    
+                    catch{
+                        
+                        Write-Host
+                        Write-Host "$($Error[0])" -BackgroundColor Red
+                        Write-Host
+
+                        }
+                    
+                    }   
+
+                }
 }
+
