@@ -6,16 +6,13 @@ function get-RMVMInventory
         )
 
         try {
-                Select-AzureRmSubscription -Subscription $SubscriptionId -ErrorAction Stop
-                write-host $(Get-AzureRmContext)
+                $ValidateSubscription = Select-AzureRmSubscription -Subscription $SubscriptionId -ErrorAction Stop
+               
                 $vms = @()
-                #$VMs += Get-AzureRmResource | where {$_.ResourceType -eq 'Microsoft.Compute/virtualMachines' -or `
-                   # $_.ResourceType -eq 'Microsoft.ClassicCompute/virtualMachines'} 
-                #Write-Host $vms
+                
                 $AzureVMs = get-azurermvm
                 foreach ($AzureVM in $AzureVMs){
-                    #write-host $VM
-                    #$azureVM = Get-AzureRmVM -Name $VM.Name -ResourceGroupName $VM.ResourceGroupName
+                    
                     $VM = New-Object -TypeName PSCustomObject
 
                     $vm | Add-Member -MemberType NoteProperty -Name VMName -Value $($AzureVM.Name) -Force
@@ -75,7 +72,7 @@ function get-RMVMInventory
                 
                     try{
                         $publicIPID = $nicAdapter.IpConfigurations.PublicIpAddress.Id.Split('/') | Select-Object -Last 1
-                        $publicIPResourceGroup = ($publicIPID.split('/'))[4]
+                        $publicIPResourceGroup = ($nicAdapter.IpConfigurations.PublicIpAddress.Id.split('/'))[4]
                         $publicIP = (Get-AzureRmPublicIpAddress -ResourceGroupName $publicIPResourceGroup -Name $publicIPID -ErrorAction Stop).IpAddress
                         $VM | Add-Member -MemberType NoteProperty -Name PublicIP -Value  $publicIP -Force
                     }
@@ -83,6 +80,9 @@ function get-RMVMInventory
                     catch{                     
                         $publicIP = $false
                         $VM | Add-Member -MemberType NoteProperty -Name PublicIP -Value  $publicIP -Force
+                        Write-Host
+                        Write-Host "$($Error[0])" -BackgroundColor Red
+                        Write-Host
    
                     }
                 
