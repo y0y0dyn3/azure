@@ -22,7 +22,17 @@ function get-csextensionstatus {
         
         if ($Extension)
             {
-                return $Extension
+                if($extension.SubStatuses)
+                    {
+                    return $extension.SubStatuses
+                    }
+
+                else
+                    {
+                        return $extension.Statuses
+                    }
+                
+                
             }
         
         else {
