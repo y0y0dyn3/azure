@@ -2,15 +2,20 @@ function get-RMVMInventory
     {
         [cmdletbinding()]
         param(
-            [parameter (Mandatory=$true)][String]$SubscriptionId
+            [parameter (Mandatory=$true)][String]$SubscriptionId,
+            [parameter (Mandatory=$false)][String]$ResourceGroupName,
+            [parameter (Mandatory=$false)][switch]$detailed
         )
 
         try {
-                $ValidateSubscription = Select-AzureRmSubscription -Subscription $SubscriptionId -ErrorAction Stop
+                $ValidateSubscription = Select-AzureRmSubscription -Subscription $SubscriptionId -ErrorAction Stop #capture in variable to hide host output.
                
                 $vms = @()
                 
-                $AzureVMs = get-azurermvm
+                if($ResourceGroupName) {$AzureVMs = get-azurermvm -ResourceGroupName $ResourceGroupName}
+                else{$AzureVMs = get-azurermvm}
+
+                if($detailed){
                 foreach ($AzureVM in $AzureVMs){
                     
                     $VM = New-Object -TypeName PSCustomObject
@@ -80,17 +85,32 @@ function get-RMVMInventory
                     catch{                     
                         $publicIP = $false
                         $VM | Add-Member -MemberType NoteProperty -Name PublicIP -Value  $publicIP -Force
-                        Write-Host
-                        Write-Host "$($Error[0])" -BackgroundColor Red
-                        Write-Host
-   
+                           
                     }
                 
                 #should make this more elegant.
                    
                 $vms += $vm
                 }
-                
+            }
+            else{
+
+                foreach($azureVM in $AzureVMs)
+                    {
+                        $VM = New-Object -TypeName PSCustomObject
+                        
+                        $vm | Add-Member -MemberType NoteProperty -Name VMName -Value $($AzureVM.Name) -Force
+                        $VM | Add-Member -MemberType NoteProperty -Name osFamily -Value  $($azureVM.StorageProfile.OsDisk.OsType) -Force
+                        $VM | Add-Member -MemberType NoteProperty -Name osType -Value $($azureVM.StorageProfile.ImageReference.Publisher) -Force
+                        $VM | Add-Member -MemberType NoteProperty -Name osVersion -Value $($azureVM.StorageProfile.ImageReference.Sku) -Force
+                        $VM | Add-Member -MemberType NoteProperty -Name Location -Value $($azureVM.Location) -Force
+                        $vm | Add-member -MemberType NoteProperty -Name ResourceGroup -Value $($AzureVM.ResourceGroupName) -Force
+
+                        $vms += $vm
+
+                    }
+
+            }    
                 return $vms
             }
         
