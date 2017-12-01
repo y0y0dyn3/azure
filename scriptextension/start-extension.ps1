@@ -2,7 +2,7 @@ function start-extension
     {
         [cmdletbinding()]
         param(
-            [parameter (Mandatory=$true)][string]$name,
+            [parameter (Mandatory=$true)][string]$VMname,
             [parameter (Mandatory=$true)][string]$ResourceGroupName,
             [parameter (Mandatory=$false)][switch]$nofile,
             [parameter (Mandatory=$false)][string]$uri,
@@ -17,8 +17,8 @@ function start-extension
         try {
 
             #Set-AzureRmContext -Subscription $SubscriptionID -ErrorAction Stop
-            $vm = Get-AzureRmVm -ResourceGroupName $ResourceGroupName -Name $name -ErrorAction Stop
-            Write-Host $VM
+            $vm = Get-AzureRmVm -ResourceGroupName $ResourceGroupName -Name $VMname -ErrorAction Stop
+            Write-Host $VM.Name
             $customScriptExtensions = $($vm.Extensions) | where {$_.VirtualMachineExtensionType -eq $ExtensionType}
             
             if($customScriptExtensions)
@@ -47,7 +47,9 @@ function start-extension
             try #change to loop that checks status Dont want to remove if in progress....
                 {
 
-                    if($nofile = $false){
+                    $timestamp = (get-date).Ticks
+                    
+                    if(!$nofile){
                         $PublicConfiguration = @{
                             "fileUris" = [Object[]]$uri;
                             "timestamp" = $timestamp;

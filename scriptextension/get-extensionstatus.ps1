@@ -1,5 +1,5 @@
 
-function get-csextensionstatus {
+function get-extensionstatus {
     [cmdletbinding()]
     param(
      [parameter (Mandatory=$true)][string]$vmName,
