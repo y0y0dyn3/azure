@@ -6,7 +6,8 @@
         [parameter (Mandatory=$true)][String]$SubscriptionId,
         [parameter (Mandatory=$true)][string]$tenantID,   
         [parameter (Mandatory=$false)][String]$ProfilePath,
-        [parameter (Mandatory=$false)][switch]$ServicePrincipal, 
+        [parameter (Mandatory=$false)][switch]$ServicePrincipal,
+        [parameter (Mandatory=$false)][pscredential]$Credential, 
         [parameter (Mandatory=$false)]
             [ValidateSet ('AzureCloud','AzureGermanCloud','AzureChinaCloud','AzureUSGovernment')]
             [String]$EnvironmentName='AzureCloud'    
@@ -25,25 +26,26 @@
                 
                 
                 if(!$ServicePrincipal)
-                {try
+                {
+                    if (!$creds){
+                    
+                        $creds = Get-Credential
+                    
+                    }
+                
+                    try
                     {           
                         $loginParams = @{
                             'SubscriptionId'= $SubscriptionId
                             'TenantID' = $tenantID
                             'EnvironmentName'= $EnvironmentName
+                            'Credential' = $Credential 
                             'ErrorAction'='Stop'
                         }   
                         
                         $azureProfile = Login-AzureRmAccount @loginParams
 
-                        <#
-                        not super happy about this.
-                        would rather pass creds in and out as a PScred object, but getting
-                        the issues outlined here:
-                        https://stackoverflow.com/questions/10036271/how-to-convert-parameter-type-into-a-different-object-type
-                        So...in order to have crednetials that I can pass to a background process, I must do the following.
-                        #>
-
+                       
                         if($ProfilePath)
                             {
                                 Save-AzureRmContext -Profile $azureProfile -Path $ProfilePath -Force -ErrorAction Stop
@@ -63,14 +65,20 @@
 
                 else{
 
-                    $Creds = Get-Credential
+                    if (!$creds){
+                    
+                        $creds = Get-Credential
+                    
+                    }
                     
                     try{
+
+                        
                     $loginParams = @{
                         'SubscriptionId'= $SubscriptionId
                         'TenantID' = $tenantID
                         'EnvironmentName'= $EnvironmentName
-                        'Credential' = $Creds
+                        'Credential' = $Credential
                         'ErrorAction'='Stop'}
                         
                         $azureProfile = Login-AzureRmAccount @loginParams -ServicePrincipal
