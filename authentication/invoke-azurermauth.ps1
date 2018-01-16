@@ -27,9 +27,9 @@
                 
                 if(!$ServicePrincipal)
                 {
-                    if (!$creds){
+                    if (!$Credential){
                     
-                        $creds = Get-Credential
+                        $Credential = Get-Credential
                     
                     }
                 
@@ -65,9 +65,9 @@
 
                 else{
 
-                    if (!$creds){
+                    if (!$Credential){
                     
-                        $creds = Get-Credential
+                        $Credential = Get-Credential
                     
                     }
                     
