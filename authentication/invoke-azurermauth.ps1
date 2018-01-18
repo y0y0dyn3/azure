@@ -17,7 +17,7 @@
             {
                 $AzureRMSubscription = Get-AzureRmSubscription -SubscriptionId $SubscriptionId -ErrorAction Stop
                 Write-Host
-                Write-Host "Already Logged In to $($AzureRMSubscription.SubscriptionName), continuing...." -BackgroundColor DarkGreen
+                Write-Host "Already Logged In to $($AzureRMSubscription.Name), continuing...." -BackgroundColor DarkGreen
                 Write-Host
             }
 
